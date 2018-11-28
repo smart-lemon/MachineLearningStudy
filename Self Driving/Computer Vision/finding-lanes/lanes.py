@@ -29,6 +29,18 @@ def show_image_matplot(disp_image):
     plt.imshow(disp_image)
     plt.show()
 
+def region_of_interest(test_image):
+    height = test_image.shape[0]
+
+    # Create a triangle
+    polygons = np.array([[ (200, height), 
+                           (1100, height), 
+                           (550, 250) ]])
+    mask = np.zeros_like(test_image)
+    cv2.fillPoly(mask, polygons, 255)
+
+    masked_image = cv2.bitwise_and(test_image, mask)
+    return masked_image
 
 image = cv2.imread('./test_image.jpg')
 
@@ -37,4 +49,4 @@ lane_image = np.copy(image)
 # Perform canny
 canny_image = perform_canny(lane_image)
 
-show_image_matplot(canny_image)
+show_image_matplot(region_of_interest(canny_image))
