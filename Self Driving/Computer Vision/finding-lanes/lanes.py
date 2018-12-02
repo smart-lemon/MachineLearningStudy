@@ -35,7 +35,7 @@ def display_lines(test_img, lines):
         for line in lines: 
             x1, y1, x2, y2 = line.reshape(4) 
             cv2.line( line_image, (x1, y1), (x2, y2),
-                      (255, 0, 0) )
+                      (25, 255, 0) )
     return line_image
                   
 def region_of_interest(test_image):
@@ -50,7 +50,16 @@ def region_of_interest(test_image):
 
     masked_image = cv2.bitwise_and(test_image, mask)
     return masked_image
- 
+
+def make_points(image, line):
+    slope, intercept = line
+    y1 = int(image.shape[0])   # bottom of the image
+    y2 = int(y1 * 3/5)         # slightly lower than the middle
+    x1 = int((y1 - intercept)/slope)
+    x2 = int((y2 - intercept)/slope)
+    return [[x1, y1, x2, y2]]
+
+
 def average_slope_intercept(image, lines):
     left_fit    = []
     right_fit   = []
@@ -58,7 +67,7 @@ def average_slope_intercept(image, lines):
         return None
     for line in lines:
         for x1, y1, x2, y2 in line:
-            fit = np.polyfit((x1,x2), (y1,y2), 1)
+            fit   = np.polyfit((x1, x2), (y1, y2), 1)
             slope = fit[0]
             intercept = fit[1]
             if slope < 0: # y is reversed in image
@@ -73,33 +82,37 @@ def average_slope_intercept(image, lines):
     averaged_lines = [left_line, right_line]
     return averaged_lines
 
-image = cv2.imread('./test_image.jpg')
+def detect_lanes_in_image():
 
-lane_image = np.copy(image)
 
-# Perform canny
-canny_image = perform_canny(lane_image)
+    image = cv2.imread('./test_image.jpg')
 
-# Crop your image - after identifying the region of interest
-cropped_image = region_of_interest(canny_image)
+    lane_image = np.copy(image)
 
-# For debugging
-# show_image_matplot(cropped_image)
+    # Perform canny
+    canny_image = perform_canny(lane_image)
 
-# Hough detection in polar 
-# where the bin size is of precision of 2 pixels by 1 degree in radians (pi/180)
-# and the threshold is minimum no of bin votes needed to detect a line 
-lines = cv2.HoughLinesP( cropped_image, 2, np.pi/180,
-                         100, # threshold 
-                         np.array([]), # placeholder 
-                         minLineLength = 40, 
-                         maxLineGap = 5 )
+    # Crop your image - after identifying the region of interest
+    cropped_image = region_of_interest(canny_image)
 
-# Draw the lines on the image
-line_image = display_lines(lane_image, lines)
+    # For debugging
+    show_image_matplot(cropped_image)
 
-# Combine the images with the lines - the weight is multiplied by all the pixel
-combo_image = cv2.addWeighted(lane_image, 0.8, line_image, 1, 
-                              1) # the gamma
-show_image_matplot(combo_image)
+    # Hough detection in polar 
+    # where the bin size is of precision of 2 pixels by 1 degree in radians (pi/180)
+    # and the threshold is minimum no of bin votes needed to detect a line 
+    lines = cv2.HoughLinesP( cropped_image, 2, np.pi/180,
+                            50, # threshold 
+                            np.array([]), # placeholder 
+                            minLineLength = 40, 
+                            maxLineGap = 5 )
 
+    # Draw the lines on the image
+    line_image = display_lines(lane_image, lines)
+
+    # Combine the images with the lines - the weight is multiplied by all the pixel
+    combo_image = cv2.addWeighted(lane_image, 0.8, line_image, 1, 
+                                1) # the gamma
+    show_image_matplot(combo_image)
+
+detect_lanes_in_image()
