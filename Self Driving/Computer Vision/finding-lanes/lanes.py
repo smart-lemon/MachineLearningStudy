@@ -140,7 +140,7 @@ def detect_lanes_in_image():
 # Detect the lane lines in a video 
 def detect_lanes_in_video():
 
-    cap = cv2.VideoCapture("/Users/renoReno/Documents/DataSet/SdVideo.mp4")
+    cap = cv2.VideoCapture("/Users/Reno/Documents/DataSet/SdVideo.mp4")
     while(cap.isOpened()):
         _, frame = cap.read()
         canny_image = perform_canny(frame)
