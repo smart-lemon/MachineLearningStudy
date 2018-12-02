@@ -50,6 +50,28 @@ def region_of_interest(test_image):
 
     masked_image = cv2.bitwise_and(test_image, mask)
     return masked_image
+ 
+def average_slope_intercept(image, lines):
+    left_fit    = []
+    right_fit   = []
+    if lines is None:
+        return None
+    for line in lines:
+        for x1, y1, x2, y2 in line:
+            fit = np.polyfit((x1,x2), (y1,y2), 1)
+            slope = fit[0]
+            intercept = fit[1]
+            if slope < 0: # y is reversed in image
+                left_fit.append((slope, intercept))
+            else:
+                right_fit.append((slope, intercept))
+    # add more weight to longer lines
+    left_fit_average  = np.average(left_fit, axis = 0)
+    right_fit_average = np.average(right_fit, axis = 0)
+    left_line  = make_points(image, left_fit_average)
+    right_line = make_points(image, right_fit_average)
+    averaged_lines = [left_line, right_line]
+    return averaged_lines
 
 image = cv2.imread('./test_image.jpg')
 
@@ -60,7 +82,9 @@ canny_image = perform_canny(lane_image)
 
 # Crop your image - after identifying the region of interest
 cropped_image = region_of_interest(canny_image)
-show_image_matplot(cropped_image)
+
+# For debugging
+# show_image_matplot(cropped_image)
 
 # Hough detection in polar 
 # where the bin size is of precision of 2 pixels by 1 degree in radians (pi/180)
