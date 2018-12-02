@@ -29,6 +29,15 @@ def show_image_matplot(disp_image):
     plt.imshow(disp_image)
     plt.show()
 
+def display_lines(test_img, lines):
+    line_image = np.zeros_like(test_img)
+    if lines is not None: 
+        for line in lines: 
+            x1, y1, x2, y2 = line.reshape(4) 
+            cv2.line( line_image, (x1, y1), (x2, y2),
+                      (255, 0, 0) )
+    return line_image
+                  
 def region_of_interest(test_image):
     height = test_image.shape[0]
 
@@ -49,4 +58,24 @@ lane_image = np.copy(image)
 # Perform canny
 canny_image = perform_canny(lane_image)
 
-show_image_matplot(region_of_interest(canny_image))
+# Crop your image - after identifying the region of interest
+cropped_image = region_of_interest(canny_image)
+show_image_matplot(cropped_image)
+
+# Hough detection in polar 
+# where the bin size is of precision of 2 pixels by 1 degree in radians (pi/180)
+# and the threshold is minimum no of bin votes needed to detect a line 
+lines = cv2.HoughLinesP( cropped_image, 2, np.pi/180,
+                         100, # threshold 
+                         np.array([]), # placeholder 
+                         minLineLength = 40, 
+                         maxLineGap = 5 )
+
+# Draw the lines on the image
+line_image = display_lines(lane_image, lines)
+
+# Combine the images with the lines - the weight is multiplied by all the pixel
+combo_image = cv2.addWeighted(lane_image, 0.8, line_image, 1, 
+                              1) # the gamma
+show_image_matplot(combo_image)
+
