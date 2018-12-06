@@ -134,19 +134,17 @@ def detect_lanes_in_image():
     
     show_image_matplot(combo_image)
 
-# Detect lane lines in an image
-# detect_lanes_in_image()
 
 # Detect the lane lines in a video 
 def detect_lanes_in_video():
-
+    ''' Open a driving dataset and detect lanes in a video '''
     cap = cv2.VideoCapture("/Users/Reno/Documents/DataSet/SdVideo.mp4")
     while(cap.isOpened()):
         _, frame = cap.read()
         canny_image = perform_canny(frame)
         cropped_canny = region_of_interest(canny_image)
         lines = cv2.HoughLinesP( cropped_canny, 2, np.pi/180, 100, np.array([]), 
-                                minLineLength = 40, maxLineGap = 5)
+                                 minLineLength = 40, maxLineGap = 5 )
         averaged_lines = average_slope_intercept(frame, lines)
         line_image = display_lines(frame, np.array(averaged_lines))
         combo_image = cv2.addWeighted(frame, 0.8, line_image, 1, 1)
@@ -157,4 +155,8 @@ def detect_lanes_in_video():
     cap.release()
     cv2.destroyAllWindows()
 
+# Detect lane lines in an image
+# detect_lanes_in_image()
+
+# Detect lanes in a video
 detect_lanes_in_video() 
