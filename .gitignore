@@ -6,6 +6,7 @@
 *.exe
 *.o
 *.so
+*.a
 
 # Packages #
 ############
@@ -40,12 +41,6 @@
 ehthumbs.db
 Thumbs.db
 .vscode
-
-# codekit #
-###########
-.sass-cache/
-.codekit-config.json
-config.codekit
 
 #Compiler Output 
 Out
